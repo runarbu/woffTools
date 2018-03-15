@@ -5,6 +5,7 @@ WOFF files. *makeFontFaceRule* is the only public function.
 This can also be used as a command line tool for generating
 CSS @font-face rules from WOFF files.
 """
+from __future__ import print_function
 
 # import test
 
@@ -24,7 +25,7 @@ except ImportError:
 
 if importErrors:
     import sys
-    print "Could not import needed module(s):", ", ".join(importErrors)
+    print("Could not import needed module(s):", ", ".join(importErrors))
     sys.exit()
 
 # import
@@ -259,14 +260,14 @@ def main():
     (options, args) = parser.parse_args()
     outputDirectory = options.outputDirectory
     if outputDirectory is not None and not os.path.exists(outputDirectory):
-        print "Directory does not exist:", outputDirectory
+        print("Directory does not exist:", outputDirectory)
         sys.exit()
     for fontPath in args:
         if not os.path.exists(fontPath):
-            print "File does not exist:", fontPath
+            print("File does not exist:", fontPath)
             sys.exit()
         else:
-            print "Creating CSS: %s..." % fontPath
+            print("Creating CSS: %s..." % fontPath)
             fontPath = fontPath.decode("utf-8")
             font = WOFFFont(fontPath)
             css = makeFontFaceRule(font, fontPath, doLocalSrc=options.doLocalSrc)

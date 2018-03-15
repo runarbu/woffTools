@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 
+from __future__ import print_function
 import sys
 from setuptools import setup
 
 try:
     import fontTools
 except:
-    print "*** Warning: woffTools requires FontTools, see:"
-    print "    fonttools.sf.net"
+    print("*** Warning: woffTools requires FontTools, see:")
+    print("    fonttools.sf.net")
 
 
 setup(

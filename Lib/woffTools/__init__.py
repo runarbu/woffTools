@@ -7,6 +7,7 @@ and WOFFWriter are also available for use outside of this module.
 Those objects are much faster than WOFFFont, but they require much
 more care.
 """
+from __future__ import print_function
 
 import zlib
 import struct
@@ -325,8 +326,8 @@ class WOFFReader(object):
             if self.checkChecksums > 1:
                 assert checksum == entry.origChecksum, "bad checksum for '%s' table" % tag
             elif checksum != entry.origChecksum:
-                print "bad checksum for '%s' table" % tag
-            print
+                print("bad checksum for '%s' table" % tag)
+            print()
         return data
 
     def getCompressedTableData(self, tag):

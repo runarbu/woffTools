@@ -6,6 +6,7 @@ A module for validating the the file structure of WOFF Files.
 
 This can also be used as a command line tool for validating WOFF files.
 """
+from __future__ import print_function
 
 # import
 
@@ -2474,17 +2475,17 @@ def main():
     options.outputFormat = "html"
     options.testGroups = None # don't expose this to the commandline. it's for testing only.
     if outputDirectory is not None and not os.path.exists(outputDirectory):
-        print "Directory does not exist:", outputDirectory
+        print("Directory does not exist:", outputDirectory)
         sys.exit()
     for fontPath in args:
         if not os.path.exists(fontPath):
-            print "File does not exist:", fontPath
+            print("File does not exist:", fontPath)
             sys.exit()
         else:
-            print "Testing: %s..." % fontPath
+            print("Testing: %s..." % fontPath)
             fontPath = fontPath.decode("utf-8")
             outputPath, report = validateFont(fontPath, options)
-            print "Wrote report to: %s" % outputPath
+            print("Wrote report to: %s" % outputPath)
 
 if __name__ == "__main__":
     main()

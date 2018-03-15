@@ -5,6 +5,7 @@ WOFF files. *proofFont* is the only public function.
 This can also be used as a command line tool for generating
 proofs from WOFF files.
 """
+from __future__ import print_function
 
 # import test
 
@@ -24,7 +25,7 @@ except ImportError:
 
 if importErrors:
     import sys
-    print "Could not import needed module(s):", ", ".join(importErrors)
+    print("Could not import needed module(s):", ", ".join(importErrors))
     sys.exit()
 
 # import
@@ -169,22 +170,22 @@ def main():
     (options, args) = parser.parse_args()
     outputDirectory = options.outputDirectory
     if outputDirectory is not None and not os.path.exists(outputDirectory):
-        print "Directory does not exist:", outputDirectory
+        print("Directory does not exist:", outputDirectory)
         sys.exit()
     sampleText = defaultSampleText
     if options.sampleTextFile:
         if not os.path.exists(options.sampleTextFile):
-            print "Sample text file does not exist:", options.sampleTextFile
+            print("Sample text file does not exist:", options.sampleTextFile)
             sys.exit()
         f = open(options.sampleTextFile, "r")
         sampleText = f.read()
         f.close()
     for fontPath in args:
         if not os.path.exists(fontPath):
-            print "File does not exist:", fontPath
+            print("File does not exist:", fontPath)
             sys.exit()
         else:
-            print "Creating Proof: %s..." % fontPath
+            print("Creating Proof: %s..." % fontPath)
             fontPath = fontPath.decode("utf-8")
             font = WOFFFont(fontPath)
             html = proofFont(font, fontPath, sampleText=sampleText)
