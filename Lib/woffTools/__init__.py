@@ -11,11 +11,12 @@ from __future__ import print_function
 
 from future import standard_library
 standard_library.install_aliases()
+import six
 from builtins import range
 from builtins import object
 import zlib
 import struct
-from io import StringIO
+from io import BytesIO
 from xml.etree import ElementTree
 from fontTools.ttLib import TTFont, debugmsg, sortedTagList
 from fontTools.ttLib.sfnt import calcChecksum, SFNTDirectoryEntry, \
@@ -105,12 +106,16 @@ class WOFFFont(TTFont):
             return None
         # private data
         elif attr == "privateData":
-            if not hasattr(self, "privateData"):
-                privateData = None
-                if self.reader is not None:
-                    privateData = self.reader.privateData
-                self.privateData = privateData
-            return self.privateData
+            # ToDo: In Python 3 hasattr makes a infinite recursion here. Skipping support for privateData in Python 3 for now
+            if six.PY2:
+                if not hasattr(self, "privateData"):
+                    privateData = None
+                    if self.reader is not None:
+                        privateData = self.reader.privateData
+                    self.privateData = privateData
+                return self.privateData
+            else:
+                return None
         elif attr == "lazy":
             return False
         # fallback to None
@@ -222,7 +227,7 @@ class WOFFFont(TTFont):
         if hasattr(self, "metadata"):
             declaration = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
             tree = ElementTree.ElementTree(self.metadata)
-            f = StringIO()
+            f = BytesIO()
             tree.write(f, encoding="utf-8")
             metadata = f.getvalue()
             # make sure the metadata starts with the declaration

@@ -13,14 +13,13 @@ except:
 
 setup(
     name="woffTools",
-    version="0.1beta",
+    version="0.2",
     description="A set of tools for working with WOFF files.",
     author="Tal Leming",
     author_email="tal@typesupply.com",
     url="https://github.com/typesupply/woffTools",
     license="MIT",
     packages=[
-        "",
         "woffTools",
         "woffTools.tools",
         "woffTools.test"

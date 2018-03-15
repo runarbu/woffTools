@@ -163,7 +163,7 @@ contents of one or more WOFF files.
 defaultSampleText = "THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG. The quick brown fox jumps over the lazy dog."
 
 def main():
-    parser = optparse.OptionParser(usage=usage, description=description, version="%prog 0.1beta")
+    parser = optparse.OptionParser(usage=usage, description=description, version="%prog 0.2")
     parser.add_option("-d", dest="outputDirectory", help="Output directory. The default is to output the proof into the same directory as the font file.")
     parser.add_option("-o", dest="outputFileName", help="Output file name. The default is \"fontfilename_proof.html\".")
     parser.add_option("-t", dest="sampleTextFile", help="Sample text file. A file containing sample text to display. If not file is provided, The quick brown fox... will be used.")
@@ -187,7 +187,8 @@ def main():
             sys.exit()
         else:
             print("Creating Proof: %s..." % fontPath)
-            fontPath = fontPath.decode("utf-8")
+            if hasattr(fontPath, "decode"):
+                fontPath = fontPath.decode("utf-8")
             font = WOFFFont(fontPath)
             html = proofFont(font, fontPath, sampleText=sampleText)
             # make the output file name
@@ -205,7 +206,7 @@ def main():
             path = os.path.join(directory, fileName)
             path = findUniqueFileName(path)
             f = open(path, "wb")
-            f.write(html)
+            f.write(html.encode('utf-8'))
             f.close()
 
 if __name__ == "__main__":

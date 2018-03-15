@@ -207,6 +207,7 @@ def _skimNameIDs(font, priority):
                 continue
             if lID != langID and langID is not None:
                 continue
+            text = text.decode("utf-8")
             text = "".join([i for i in text if i != "\x00"])
             return text
 
@@ -256,7 +257,7 @@ tool should always be carefully checked.
 """
 
 def main():
-    parser = optparse.OptionParser(usage=usage, description=description, version="%prog 0.1beta")
+    parser = optparse.OptionParser(usage=usage, description=description, version="%prog 0.2")
     parser.add_option("-d", dest="outputDirectory", help="Output directory. The default is to output the CSS into the same directory as the font file.")
     parser.add_option("-o", dest="outputFileName", help="Output file name. The default is \"fontfilename.css\". If this file already exists a time stamp will be added to the file name.")
     parser.add_option("-l", action="store_true", dest="doLocalSrc", help="Write \"local\" instructions as part of the \"src\" descriptor.")
@@ -271,7 +272,8 @@ def main():
             sys.exit()
         else:
             print("Creating CSS: %s..." % fontPath)
-            fontPath = fontPath.decode("utf-8")
+            if hasattr(fontPath, "decode"):
+                fontPath = fontPath.decode("utf-8")
             font = WOFFFont(fontPath)
             css = makeFontFaceRule(font, fontPath, doLocalSrc=options.doLocalSrc)
             # make the output file name
@@ -289,7 +291,7 @@ def main():
             path = os.path.join(directory, fileName)
             path = findUniqueFileName(path)
             f = open(path, "wb")
-            f.write(css)
+            f.write(css.encode('utf-8'))
             f.close()
 
 if __name__ == "__main__":

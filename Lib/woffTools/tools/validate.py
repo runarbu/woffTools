@@ -27,7 +27,7 @@ import struct
 import zlib
 import optparse
 import codecs
-from io import StringIO
+from io import BytesIO
 from xml.etree import ElementTree
 from xml.parsers.expat import ExpatError
 
@@ -583,7 +583,7 @@ def _testHeaderSignature(data, reporter):
     """
     header = unpackHeader(data)
     signature = header["signature"]
-    if signature != "wOFF":
+    if signature.decode("utf-8") != "wOFF":
         reporter.logError(message="Invalid signature: %s." % signature)
         return True
     else:
@@ -599,7 +599,7 @@ def _testHeaderFlavor(data, reporter):
     """
     header = unpackHeader(data)
     flavor = header["flavor"]
-    if flavor not in ("OTTO", "\000\001\000\000", "true"):
+    if flavor not in ("OTTO", "\000\001\000\000".encode('utf-8'), "true"):
         reporter.logWarning(message="Unknown flavor: %s." % flavor)
     else:
         try:
@@ -887,9 +887,9 @@ def _testTableDirectory4ByteOffsets(data, reporter):
         tag = table["tag"]
         offset = table["offset"]
         if offset % 4:
-            reporter.logError(message="The \"%s\" table does not begin on a 4-byte boundary (%d)." % (tag, offset))
+            reporter.logError(message="The \"%s\" table does not begin on a 4-byte boundary (%d)." % (tag.decode("utf-8"), offset.decode("utf-8")))
         else:
-            reporter.logPass(message="The \"%s\" table begins on a 4-byte boundary." % tag)
+            reporter.logPass(message="The \"%s\" table begins on a 4-byte boundary." % tag.decode("utf-8"))
 
 def _testTableDirectoryPadding(data, reporter):
     """
@@ -922,10 +922,11 @@ def _testTableDirectoryPadding(data, reporter):
             paddingOffset = offset + length
             padding = data[paddingOffset:paddingOffset+paddingLength]
             expectedPadding = "\0" * paddingLength
+            expectedPadding = expectedPadding.encode('utf-8')
             if padding != expectedPadding:
-                reporter.logError(message="The \"%s\" table is not padded with null bytes." % tag)
+                reporter.logError(message="The \"%s\" table is not padded with null bytes." % tag.decode("utf-8"))
             else:
-                reporter.logPass(message="The \"%s\" table is padded with null bytes." % tag)
+                reporter.logPass(message="The \"%s\" table is padded with null bytes." % tag.decode("utf-8"))
 
 def _testTableDirectoryPositions(data, reporter):
     """
@@ -950,7 +951,7 @@ def _testTableDirectoryPositions(data, reporter):
             if tag == otherTag:
                 continue
             if start >= otherStart and start < otherEnd:
-                reporter.logError(message="The \"%s\" table overlaps the \"%s\" table." % (tag, otherTag))
+                reporter.logError(message="The \"%s\" table overlaps the \"%s\" table." % (tag.decode("utf-8"), otherTag.decode("utf-8")))
                 tablesWithProblems.add(tag)
                 tablesWithProblems.add(otherTag)
     # test for invalid offset, length and combo
@@ -971,17 +972,17 @@ def _testTableDirectoryPositions(data, reporter):
         # offset is before the beginning of the table data block
         if offset < minOffset:
             tablesWithProblems.add(tag)
-            message = "The \"%s\" table directory entry offset (%d) is before the start of the table data block (%d)." % (tag, offset, minOffset)
+            message = "The \"%s\" table directory entry offset (%d) is before the start of the table data block (%d)." % (tag.decode("utf-8"), offset, minOffset)
             reporter.logError(message=message)
         # offset is after the end of the table data block
         elif offset > tableDataEnd:
             tablesWithProblems.add(tag)
-            message = "The \"%s\" table directory entry offset (%d) is past the end of the table data block (%d)." % (tag, offset, tableDataEnd)
+            message = "The \"%s\" table directory entry offset (%d) is past the end of the table data block (%d)." % (tag.decode("utf-8"), offset, tableDataEnd)
             reporter.logError(message=message)
         # offset + length is after the end of the table tada block
         elif (offset + length) > tableDataEnd:
             tablesWithProblems.add(tag)
-            message = "The \"%s\" table directory entry offset (%d) + length (%d) is past the end of the table data block (%d)." % (tag, offset, length, tableDataEnd)
+            message = "The \"%s\" table directory entry offset (%d) + length (%d) is past the end of the table data block (%d)." % (tag.decode("utf-8"), offset, length, tableDataEnd)
             reporter.logError(message=message)
     # test for gaps
     tables = []
@@ -1005,7 +1006,7 @@ def _testTableDirectoryPositions(data, reporter):
         tag = entry["tag"]
         if tag in tablesWithProblems:
             continue
-        reporter.logPass(message="The \"%s\" table directory entry has a valid offset and length." % tag)
+        reporter.logPass(message="The \"%s\" table directory entry has a valid offset and length." % tag.decode("utf-8"))
 
 def _testTableDirectoryCompressedLength(data, reporter):
     """
@@ -1018,9 +1019,9 @@ def _testTableDirectoryCompressedLength(data, reporter):
         compLength = table["compLength"]
         origLength = table["origLength"]
         if compLength > origLength:
-            reporter.logError(message="The \"%s\" table directory entry has a compressed length (%d) larger than the original length (%d)." % (tag, compLength, origLength))
+            reporter.logError(message="The \"%s\" table directory entry has a compressed length (%d) larger than the original length (%d)." % (tag.decode("utf-8"), compLength, origLength))
         else:
-            reporter.logPass(message="The \"%s\" table directory entry has proper compLength and origLength values." % tag)
+            reporter.logPass(message="The \"%s\" table directory entry has proper compLength and origLength values." % tag.decode("utf-8"))
 
 def _testTableDirectoryDecompressedLength(data, reporter):
     """
@@ -1042,9 +1043,9 @@ def _testTableDirectoryDecompressedLength(data, reporter):
             continue
         decompressedLength = len(decompressedData)
         if origLength != decompressedLength:
-            reporter.logError(message="The \"%s\" table directory entry has an original length (%d) that does not match the actual length of the decompressed data (%d)." % (tag, origLength, decompressedLength))
+            reporter.logError(message="The \"%s\" table directory entry has an original length (%d) that does not match the actual length of the decompressed data (%d)." % (tag.decode("utf-8"), origLength, decompressedLength))
         else:
-            reporter.logPass(message="The \"%s\" table directory entry has a proper original length compared to the actual decompressed data." % tag)
+            reporter.logPass(message="The \"%s\" table directory entry has a proper original length compared to the actual decompressed data." % tag.decode("utf-8"))
 
 def _testTableDirectoryChecksums(data, reporter):
     """
@@ -1062,17 +1063,17 @@ def _testTableDirectoryChecksums(data, reporter):
         # couldn't be decompressed.
         if decompressedData is None:
             continue
-        newChecksum = calcChecksum(tag, decompressedData)
+        newChecksum = calcChecksum(tag.decode("utf-8"), decompressedData)
         if newChecksum != origChecksum:
-            reporter.logError(message="The \"%s\" table directory entry original checksum (%s) does not match the checksum (%s) calculated from the data." % (tag, hex(origChecksum), hex(newChecksum)))
+            reporter.logError(message="The \"%s\" table directory entry original checksum (%s) does not match the checksum (%s) calculated from the data." % (tag.decode("utf-8"), hex(origChecksum), hex(newChecksum)))
         else:
-            reporter.logPass(message="The \"%s\" table directory entry original checksum is correct." % tag)
+            reporter.logPass(message="The \"%s\" table directory entry original checksum is correct." % tag.decode("utf-8"))
     # check the head checksum adjustment
-    if "head" not in tables:
+    if b"head" not in tables:
         reporter.logWarning(message="The font does not contain a \"head\" table.")
     else:
         newChecksum = calcHeadChecksum(data)
-        data = tables["head"]
+        data = tables[b"head"]
         try:
             checksum = struct.unpack(">L", data[8:12])[0]
             if checksum != newChecksum:
@@ -1127,9 +1128,9 @@ def _testTableDataDecompression(data, reporter):
         entryData = data[offset:offset+compLength]
         try:
             decompressed = zlib.decompress(entryData)
-            reporter.logPass(message="The \"%s\" table data can be decompressed with zlib." % tag)
+            reporter.logPass(message="The \"%s\" table data can be decompressed with zlib." % tag.decode("utf-8"))
         except zlib.error:
-            reporter.logError(message="The \"%s\" table data can not be decompressed with zlib." % tag)
+            reporter.logError(message="The \"%s\" table data can not be decompressed with zlib." % tag.decode("utf-8"))
 
 # ----------------
 # Tests: Metadata
@@ -1658,7 +1659,8 @@ def calcPaddingLength(length):
     return 4 - (length % 4)
 
 def padData(data):
-    data += "\0" * calcPaddingLength(len(data))
+    pad = "\0" * calcPaddingLength(len(data))
+    data += pad.encode('utf-8')
     return data
 
 def sumDataULongs(data):
@@ -1668,7 +1670,7 @@ def sumDataULongs(data):
 
 def calcChecksum(tag, data):
     if tag == "head":
-        data = data[:8] + "\0\0\0\0" + data[12:]
+        data = data[:8] + b"\0\0\0\0" + data[12:]
     data = padData(data)
     value = sumDataULongs(data)
     return value
@@ -1743,7 +1745,7 @@ class XMLWriter(object):
             self._elements[-1].text += text
 
     def compile(self, encoding="utf-8"):
-        f = StringIO()
+        f = BytesIO()
         tree = ElementTree.ElementTree(self._root)
         indent(tree.getroot())
         tree.write(f, encoding=encoding)
@@ -2311,7 +2313,7 @@ def finishHTML(writer):
     writer.endtag("html")
     # get the text
     text = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n"
-    text += writer.compile()
+    text += writer.compile().decode("utf-8")
     text = text.replace("c_l_a_s_s", "class")
     text = text.replace("a_p_o_s_t_r_o_p_h_e", "'")
     text = text.replace("l_e_s_s", "<")
@@ -2458,7 +2460,7 @@ def validateFont(path, options, writeFile=True):
         reportPath = os.path.join(directory, fileName)
         reportPath = findUniqueFileName(reportPath)
         f = open(reportPath, "wb")
-        f.write(report)
+        f.write(report.encode('utf-8'))
         f.close()
     return reportPath, report
 
@@ -2475,7 +2477,7 @@ the wrapped font data.
 """
 
 def main():
-    parser = optparse.OptionParser(usage=usage, description=description, version="%prog 0.1beta")
+    parser = optparse.OptionParser(usage=usage, description=description, version="%prog 0.2")
     parser.add_option("-d", dest="outputDirectory", help="Output directory. The default is to output the report into the same directory as the font file.")
     parser.add_option("-o", dest="outputFileName", help="Output file name. The default is \"fontfilename_validate.html\".")
     parser.set_defaults(excludeTests=[])
@@ -2492,7 +2494,8 @@ def main():
             sys.exit()
         else:
             print("Testing: %s..." % fontPath)
-            fontPath = fontPath.decode("utf-8")
+            if hasattr(fontPath, "decode"):
+                fontPath = fontPath.decode("utf-8")
             outputPath, report = validateFont(fontPath, options)
             print("Wrote report to: %s" % outputPath)
 
