@@ -696,7 +696,7 @@ def decompressedLengthTest1():
     header, directory, tableData = defaultTestData(header=True, directory=True, tableData=True)
     origData = testDataTableData
     compData = zlib.compress(origData)
-    for tag, (origData, compData) in tableData.items():
+    for tag, (origData, compData) in list(tableData.items()):
         tableData[tag] = (origData, zlib.compress(origData))
     updateDirectoryEntries(directory, tableData)
     return packTestHeader(header) + packTestDirectory(directory) + packTestTableData(directory, tableData)
@@ -711,7 +711,7 @@ def decompressedLengthTest2():
     header, directory, tableData = defaultTestData(header=True, directory=True, tableData=True)
     origData = testDataTableData
     compData = zlib.compress(origData)
-    for tag, (origData, compData) in tableData.items():
+    for tag, (origData, compData) in list(tableData.items()):
         tableData[tag] = (origData, zlib.compress(origData))
     updateDirectoryEntries(directory, tableData)
     for entry in directory:
@@ -952,7 +952,7 @@ def decompressionTest1():
     (False, 'PASS')
     """
     header, directory, tableData = defaultTestData(header=True, directory=True, tableData=True)
-    for tag, (origData, compData) in tableData.items():
+    for tag, (origData, compData) in list(tableData.items()):
         tableData[tag] = (origData, zlib.compress(compData))
     updateDirectoryEntries(directory, tableData)
     return packTestHeader(header) + packTestDirectory(directory) + packTestTableData(directory, tableData)
@@ -965,7 +965,7 @@ def decompressionTest2():
     (True, 'ERROR')
     """
     header, directory, tableData = defaultTestData(header=True, directory=True, tableData=True)
-    for tag, (origData, compData) in tableData.items():
+    for tag, (origData, compData) in list(tableData.items()):
         compData = "".join(reversed(zlib.compress(compData)))
         tableData[tag] = (origData, compData)
     updateDirectoryEntries(directory, tableData)

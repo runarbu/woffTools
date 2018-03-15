@@ -9,6 +9,7 @@ from __future__ import print_function
 
 # import test
 
+from builtins import chr
 importErrors = []
 try:
     import numpy
@@ -104,7 +105,7 @@ def makeCharacterSet(font):
     categorizedCharacters = {}
     glyphNameToCharacter = {}
     for value, glyphName in sorted(mapping.items()):
-        character = unichr(value)
+        character = chr(value)
         # skip whitespace
         if not character.strip():
             continue

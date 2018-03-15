@@ -8,6 +8,10 @@ from __future__ import print_function
 
 # import test
 
+from builtins import str
+from builtins import hex
+from builtins import chr
+from builtins import range
 importErrors = []
 try:
     import numpy
@@ -176,7 +180,7 @@ def writePrivateData(font, writer):
         src = font.privateData
         length = 16
         result = []
-        for i in xrange(0, len(src), length):
+        for i in range(0, len(src), length):
             s = src[i:i+length]
             hexa = []
             c = []

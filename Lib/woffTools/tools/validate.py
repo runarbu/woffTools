@@ -7,9 +7,18 @@ A module for validating the the file structure of WOFF Files.
 This can also be used as a command line tool for validating WOFF files.
 """
 from __future__ import print_function
+from __future__ import division
 
 # import
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import hex
+from builtins import range
+from past.builtins import basestring
+from builtins import object
+from past.utils import old_div
 import os
 import re
 import time
@@ -18,7 +27,7 @@ import struct
 import zlib
 import optparse
 import codecs
-from cStringIO import StringIO
+from io import StringIO
 from xml.etree import ElementTree
 from xml.parsers.expat import ExpatError
 
@@ -1319,7 +1328,7 @@ def _validateMetadataElement(element, spec, reporter, parentTree=[]):
     haveError = False
     # unknown attributes
     knownAttributes = []
-    for attrib in spec["requiredAttributes"].keys() + spec["recommendedAttributes"].keys() + spec["optionalAttributes"].keys():
+    for attrib in list(spec["requiredAttributes"].keys()) + list(spec["recommendedAttributes"].keys()) + list(spec["optionalAttributes"].keys()):
         attrib = _parseAttribute(attrib)
         knownAttributes.append(attrib)
     for attrib in sorted(element.attrib.keys()):
@@ -1354,7 +1363,7 @@ def _validateMetadataElement(element, spec, reporter, parentTree=[]):
             if e:
                 haveError = True
     # unknown child-elements
-    knownChildElements = spec["requiredChildElements"].keys() + spec["recommendedChildElements"].keys() + spec["optionalChildElements"].keys()
+    knownChildElements = list(spec["requiredChildElements"].keys()) + list(spec["recommendedChildElements"].keys()) + list(spec["optionalChildElements"].keys())
     for childElement in element:
         if childElement.tag not in knownChildElements:
            _logMetadataResult(
@@ -1653,7 +1662,7 @@ def padData(data):
     return data
 
 def sumDataULongs(data):
-    longs = struct.unpack(">%dL" % (len(data) / 4), data)
+    longs = struct.unpack(">%dL" % (old_div(len(data), 4)), data)
     value = sum(longs) % (2 ** 32)
     return value
 
@@ -1695,7 +1704,7 @@ def calcHeadChecksum(data):
     for tag, sfntEntry in sorted(sfntEntries.items()):
         sfntData += structPack(sfntDirectoryEntryFormat, sfntEntry)
     # calculate
-    checkSums = [entry["checkSum"] for entry in sfntEntries.values()]
+    checkSums = [entry["checkSum"] for entry in list(sfntEntries.values())]
     checkSums.append(sumDataULongs(sfntData))
     checkSum = sum(checkSums)
     checkSum = (0xB1B0AFBA - checkSum) & 0xffffffff
@@ -2276,7 +2285,7 @@ def startHTML(title=None, cssReplacements={}):
     # write the css
     writer.begintag("style", type="text/css")
     css = defaultCSS
-    for before, after in cssReplacements.items():
+    for before, after in list(cssReplacements.items()):
         css = css.replace(before, after)
     writer.write(css)
     writer.endtag("style")

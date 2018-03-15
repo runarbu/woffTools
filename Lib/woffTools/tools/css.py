@@ -9,6 +9,9 @@ from __future__ import print_function
 
 # import test
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import hex
 importErrors = []
 try:
     import numpy
@@ -31,7 +34,7 @@ if importErrors:
 # import
 
 import os
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import optparse
 from woffTools import WOFFFont
 from woffTools.tools.support import findUniqueFileName
@@ -91,7 +94,7 @@ def makeFontFaceSrc(font, fileName, doLocalSrc=True):
             s = "/* " + s + " */"
         sources.append(s)
     # file name
-    s = "url(\"%s\")" % urllib.quote(fileName) # XXX:  format(\"woff\")
+    s = "url(\"%s\")" % urllib.parse.quote(fileName) # XXX:  format(\"woff\")
     sources.append(s)
     # write
     sources = "\n\t".join(sources)
@@ -195,7 +198,7 @@ def _skimNameIDs(font, priority):
         text = nameRecord.string
         nameIDs[nameID, platformID, platEncID, langID] = text
     for (nameID, platformID, platEncID, langID) in priority:
-        for (nID, pID, pEID, lID), text in nameIDs.items():
+        for (nID, pID, pEID, lID), text in list(nameIDs.items()):
             if nID != nameID:
                 continue
             if pID != platformID and platformID is not None:

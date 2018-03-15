@@ -1,7 +1,10 @@
+from future import standard_library
+standard_library.install_aliases()
+from builtins import object
 import os
 import time
 from xml.etree import ElementTree
-from cStringIO import StringIO
+from io import StringIO
 
 # ----------------------
 # Very Simple XML Writer
@@ -361,7 +364,7 @@ def startHTML(title=None, cssReplacements={}):
     # write the css
     writer.begintag("style", type="text/css")
     css = defaultCSS
-    for before, after in cssReplacements.items():
+    for before, after in list(cssReplacements.items()):
         css = css.replace(before, after)
     writer.write(css)
     writer.endtag("style")

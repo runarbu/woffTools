@@ -9,9 +9,13 @@ more care.
 """
 from __future__ import print_function
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import range
+from builtins import object
 import zlib
 import struct
-from cStringIO import StringIO
+from io import StringIO
 from xml.etree import ElementTree
 from fontTools.ttLib import TTFont, debugmsg, sortedTagList
 from fontTools.ttLib.sfnt import calcChecksum, SFNTDirectoryEntry, \
@@ -78,7 +82,7 @@ class WOFFFont(TTFont):
             self.flavor = self.reader.flavor
             self.majorVersion = self.reader.majorVersion
             self.minorVersion = self.reader.minorVersion
-            self._tableOrder = self.reader.keys()
+            self._tableOrder = list(self.reader.keys())
         else:
             self._metadata = ElementTree.Element("metadata", version="1.0")
             self.privateData = None
@@ -167,7 +171,7 @@ class WOFFFont(TTFont):
         # if DSIG is to be written, the table order
         # must be completely specified. otherwise the
         # DSIG may not be valid after decoding the WOFF.
-        tags = self.keys()
+        tags = list(self.keys())
         if "GlyphOrder" in tags:
             tags.remove("GlyphOrder")
         if "DSIG" in tags:
@@ -306,7 +310,7 @@ class WOFFReader(object):
         of each table.
         """
         sorter = []
-        for tag, entry in self.tables.items():
+        for tag, entry in list(self.tables.items()):
             sorter.append((entry.offset, tag))
         order = [tag for offset, tag in sorted(sorter)]
         return order
@@ -695,7 +699,7 @@ def calcHeadCheckSumAdjustment(flavor, tables):
         sfntEntry.length = entry["length"]
         directory += sfntEntry.toString()
     # calculate the checkSumAdjustment
-    checkSums = [entry["checkSum"] for entry in tables.values()]
+    checkSums = [entry["checkSum"] for entry in list(tables.values())]
     checkSums.append(calcChecksum(directory))
     checkSumAdjustment = sum(checkSums)
     checkSumAdjustment = (0xB1B0AFBA - checkSumAdjustment) & 0xffffffff
@@ -925,8 +929,8 @@ def _testOverlaps(tableDirectory):
         edges[entry["tag"]] = (start, end)
     # look for overlaps
     overlaps = set()
-    for tag, (start, end) in edges.items():
-        for otherTag, (otherStart, otherEnd) in edges.items():
+    for tag, (start, end) in list(edges.items()):
+        for otherTag, (otherStart, otherEnd) in list(edges.items()):
             tag = tag.strip()
             otherTag = otherTag.strip()
             if tag == otherTag:
